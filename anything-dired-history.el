@@ -1,4 +1,4 @@
-;;;; anything-dired-history.el Show dired history with anything.el support.
+;;; anything-dired-history.el Show dired history with anything.el support.
 
 ;; Filename: anything-dired-history.el
 ;; Description:  Show dired history with anything.el support.
@@ -8,7 +8,7 @@
 ;; Created: 2011-03-26
 ;; Version: 0.1.0
 ;; URL: http://www.emacswiki.org/emacs/download/anything-dired-history.el
-;; Keywords: anything, dired history 
+;; Keywords: anything, dired history
 ;; Compatibility: (Test on GNU Emacs 23.2.1)
 ;;  .
 ;;
@@ -56,7 +56,7 @@
 ;;
 ;; Or:
 ;; (autoload 'anything-dired-history-view "anything-dired-history"
-;;    "view dired directories you have visited." t)        
+;;    "view dired directories you have visited." t)
 ;; (setq-default anything-dired-history-cache-file "~/.emacs.d/dired-history")
 ;; (define-key dired-mode-map "," 'anything-dired-history-view)
 ;;
@@ -95,7 +95,7 @@ visited."
   "~/.emacs.d/cache/anything-dired-history-cache-file"
   "anything-dired-history-cache-file."
   :group 'anything-dired-history)
-  
+
 (defcustom anything-dired-history-max-length 20
     "the max length of dired history."
   :group 'anything-dired-history)
@@ -117,7 +117,7 @@ visited."
   (setq anything-dired-history-variable
         (append (list (dired-current-directory)) anything-dired-history-variable)))
 
-;;when you open dired buffer ,update `anything-dired-history-variable'.  
+;;when you open dired buffer ,update `anything-dired-history-variable'.
 (add-hook 'dired-after-readin-hook 'anything-dired-history-update)
 
 (defun anything-dired-history-write2dist()
