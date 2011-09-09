@@ -51,13 +51,17 @@
 ;;; Installation:
 ;;
 ;; (require 'anything-dired-history)
-;; (setq anything-dired-history-cache-file "~/.emacs.d/dired-history")
 ;; (define-key dired-mode-map "," 'anything-dired-history-view)
+
+;; (require 'savehist)
+;; (setq savehist-additional-variables
+;;       '( anything-dired-history-variable
+;;          ))
+;; (savehist-mode 1)
 ;;
 ;; Or:
 ;; (autoload 'anything-dired-history-view "anything-dired-history"
 ;;    "view dired directories you have visited." t)
-;; (setq-default anything-dired-history-cache-file "~/.emacs.d/dired-history")
 ;; (define-key dired-mode-map "," 'anything-dired-history-view)
 ;;
 ;;
@@ -72,43 +76,31 @@
 ;;
 ;; Below are customizable option list:
 ;;
-;;  `anything-dired-history-cache-file'
-;;    anything-dired-history-cache-file.
-;;    default = "~/.emacs.d/cache/anything-dired-history-cache-file"
-;;  `anything-dired-history-max-length'
-;;    the max length of dired history.
-;;    default = 20
 
 
 ;;; Require
 (require 'anything)
 (require 'dired)
 
-(defgroup anything-dired-history nil
-  "list dired history,somebody only keep a dired buffer,
-so ,this files can use `anything' to show dired history you
-visited."
-  :prefix "anything-dired-history"
-  :group 'convenience)
 
-(defcustom anything-dired-history-cache-file
-  "~/.emacs.d/cache/anything-dired-history-cache-file"
-  "anything-dired-history-cache-file."
-  :group 'anything-dired-history)
+;; (defcustom anything-dired-history-cache-file
+;;   "~/.emacs.d/cache/anything-dired-history-cache-file"
+;;   "anything-dired-history-cache-file."
+;;   :group 'anything-dired-history)
 
-(defcustom anything-dired-history-max-length 20
-    "the max length of dired history."
-  :group 'anything-dired-history)
+;; (defcustom anything-dired-history-max-length 20
+;;     "the max length of dired history."
+;;   :group 'anything-dired-history)
 
 (defvar anything-dired-history-variable nil)
 
-;; if `anything-dired-history-cache-file' exists ,init
-;; `anything-dired-history-variable' with data from this file.
-(when (file-exists-p (expand-file-name anything-dired-history-cache-file))
-  (with-current-buffer (find-file-noselect anything-dired-history-cache-file)
-    (goto-char (point-min))
-    (setq anything-dired-history-variable (read (current-buffer)))
-    (kill-buffer)))
+;; ;; if `anything-dired-history-cache-file' exists ,init
+;; ;; `anything-dired-history-variable' with data from this file.
+;; (when (file-exists-p (expand-file-name anything-dired-history-cache-file))
+;;   (with-current-buffer (find-file-noselect anything-dired-history-cache-file)
+;;     (goto-char (point-min))
+;;     (setq anything-dired-history-variable (read (current-buffer)))
+;;     (kill-buffer)))
 
 (defun anything-dired-history-update()
   "update variable `anything-dired-history-variable'."
@@ -120,23 +112,25 @@ visited."
 ;;when you open dired buffer ,update `anything-dired-history-variable'.
 (add-hook 'dired-after-readin-hook 'anything-dired-history-update)
 
-(defun anything-dired-history-write2dist()
-  "write `anything-dired-history-variable' to disk."
-  (let ((tmp-history)(index 0))
-    (while  (< index (min (length anything-dired-history-variable)
-                          anything-dired-history-max-length))
-      (setq tmp-history (append tmp-history (list (nth index anything-dired-history-variable))))
-      (setq index (1+ index)))
-      (with-temp-file (expand-file-name anything-dired-history-cache-file)
-        (prin1 tmp-history (current-buffer)))
-      ))
-(add-hook 'kill-emacs-hook 'anything-dired-history-write2dist)
-(run-with-timer 600 1800 'recentf-save-list)
+;; (defun anything-dired-history-write2dist()
+;;   "write `anything-dired-history-variable' to disk."
+;;   (let ((tmp-history)(index 0))
+;;     (while  (< index (min (length anything-dired-history-variable)
+;;                           anything-dired-history-max-length))
+;;       (setq tmp-history (append tmp-history (list (nth index anything-dired-history-variable))))
+;;       (setq index (1+ index)))
+;;       (with-temp-file (expand-file-name anything-dired-history-cache-file)
+;;         (prin1 tmp-history (current-buffer)))
+;;       ))
+;; (add-hook 'kill-emacs-hook 'anything-dired-history-write2dist)
+;; (run-with-timer 600 1800 'recentf-save-list)
+
 (defvar anything-c-source-dired-history
   '((name . "Dired History:")
     (candidates . anything-dired-history-variable)
     (action . (("Go" . (lambda(candidate) (dired candidate)))))))
 
+;;;###autoload
 (defun anything-dired-history-view()
   "call `anything' to show dired history."
   (interactive)
