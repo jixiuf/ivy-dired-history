@@ -101,7 +101,7 @@
 ;;     (goto-char (point-min))
 ;;     (setq anything-dired-history-variable (read (current-buffer)))
 ;;     (kill-buffer)))
-
+;;;###autoload
 (defun anything-dired-history-update()
   "update variable `anything-dired-history-variable'."
   (setq anything-dired-history-variable
@@ -110,6 +110,7 @@
         (append (list (dired-current-directory)) anything-dired-history-variable)))
 
 ;;when you open dired buffer ,update `anything-dired-history-variable'.
+;;;###autoload
 (add-hook 'dired-after-readin-hook 'anything-dired-history-update)
 
 ;; (defun anything-dired-history-write2dist()
