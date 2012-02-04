@@ -126,6 +126,7 @@
 ;; (add-hook 'kill-emacs-hook 'anything-dired-history-write2dist)
 ;; (run-with-timer 600 1800 'recentf-save-list)
 
+;;;###autoload
 (defvar anything-c-source-dired-history
   '((name . "Dired History:")
     (candidates . anything-dired-history-variable)
