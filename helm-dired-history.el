@@ -1,21 +1,15 @@
 ;;; helm-dired-history.el --- Show dired history with helm.el support.
 
-;; Filename: helm-dired-history.el
-;; Description:  Show dired history with helm.el support.
-;; Author: Joseph <jixiuf@gmail.com>
-;; Maintainer: Joseph <jixiuf@gmail.com>
-;; Copyright (C) 2011~, Joseph, all rights reserved.
+;; Author: Joseph(纪秀峰) <jixiuf@gmail.com>
+;; Copyright (C) 2011,2012, Joseph(纪秀峰), all rights reserved.
 ;; Created: 2011-03-26
-;; Version: 0.1.0
-;; URL: http://www.emacswiki.org/emacs/download/helm-dired-history.el
+;; Version: 0.1.1
+;; X-URL:https://github.com/jixiuf/helm-dired-history
 ;; Keywords: helm, dired history
-;; Compatibility: (Test on GNU Emacs 23.2.1)
-;;  .
 ;;
 ;; Features that might be required by this library:
 ;;
 ;; `helm' `dired'
-;;
 ;;
 ;;; This file is NOT part of GNU Emacs
 
@@ -44,26 +38,14 @@
 ;; forward and back in different dired directory. this file
 ;; can remember dired directory you have visited and list them
 ;; using `helm.el'.
-;; `helm-dired-history.el' will save all dired directory you
-;; have visited to file `helm-dired-history-cache-file'
-;;
 
 ;;; Installation:
-;;
 ;; (require 'helm-dired-history)
 ;; (define-key dired-mode-map "," 'helm-dired-history-view)
 
 ;; (require 'savehist)
-;; (setq savehist-additional-variables
-;;       '( helm-dired-history-variable
-;;          ))
+;; (add-to-list 'savehist-additional-variables 'helm-dired-history-variable)
 ;; (savehist-mode 1)
-;;
-;; Or:
-;; (autoload 'helm-dired-history-view "helm-dired-history"
-;;    "view dired directories you have visited." t)
-;; (define-key dired-mode-map "," 'helm-dired-history-view)
-;;
 ;;
 ;;; Commands:
 ;;
@@ -77,30 +59,13 @@
 ;; Below are customizable option list:
 ;;
 
+;;; Code:
 
-;;; Require
 (require 'helm)
 (require 'dired)
 
-
-;; (defcustom helm-dired-history-cache-file
-;;   "~/.emacs.d/cache/helm-dired-history-cache-file"
-;;   "helm-dired-history-cache-file."
-;;   :group 'helm-dired-history)
-
-;; (defcustom helm-dired-history-max-length 20
-;;     "the max length of dired history."
-;;   :group 'helm-dired-history)
-
 (defvar helm-dired-history-variable nil)
 
-;; ;; if `helm-dired-history-cache-file' exists ,init
-;; ;; `helm-dired-history-variable' with data from this file.
-;; (when (file-exists-p (expand-file-name helm-dired-history-cache-file))
-;;   (with-current-buffer (find-file-noselect helm-dired-history-cache-file)
-;;     (goto-char (point-min))
-;;     (setq helm-dired-history-variable (read (current-buffer)))
-;;     (kill-buffer)))
 ;;;###autoload
 (defun helm-dired-history-update()
   "update variable `helm-dired-history-variable'."
@@ -112,19 +77,6 @@
 ;;when you open dired buffer ,update `helm-dired-history-variable'.
 ;;;###autoload
 (add-hook 'dired-after-readin-hook 'helm-dired-history-update)
-
-;; (defun helm-dired-history-write2dist()
-;;   "write `helm-dired-history-variable' to disk."
-;;   (let ((tmp-history)(index 0))
-;;     (while  (< index (min (length helm-dired-history-variable)
-;;                           helm-dired-history-max-length))
-;;       (setq tmp-history (append tmp-history (list (nth index helm-dired-history-variable))))
-;;       (setq index (1+ index)))
-;;       (with-temp-file (expand-file-name helm-dired-history-cache-file)
-;;         (prin1 tmp-history (current-buffer)))
-;;       ))
-;; (add-hook 'kill-emacs-hook 'helm-dired-history-write2dist)
-;; (run-with-timer 600 1800 'recentf-save-list)
 
 ;;;###autoload
 (defvar helm-c-source-dired-history
