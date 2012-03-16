@@ -7,12 +7,13 @@ can remember dired directory you have visited and list them
 using `helm.el'.
 
  Installation:
-(require 'helm-dired-history)
-(define-key dired-mode-map "," 'helm-dired-history-view)
 
 (require 'savehist)
 (add-to-list 'savehist-additional-variables 'helm-dired-history-variable)
 (savehist-mode 1)
+(eval-after-load 'dired
+  '(progn (require 'helm-dired-history)
+          (define-key dired-mode-map "," 'helm-dired-history-view)))
 
 * anything.el has been renamed to Emacs Helm.
 The new project is hosted under GitHub? - https://github.com/emacs-helm/helm
