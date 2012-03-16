@@ -40,12 +40,13 @@
 ;; using `helm.el'.
 
 ;;; Installation:
-;; (require 'helm-dired-history)
-;; (define-key dired-mode-map "," 'helm-dired-history-view)
 
 ;; (require 'savehist)
 ;; (add-to-list 'savehist-additional-variables 'helm-dired-history-variable)
 ;; (savehist-mode 1)
+;; (eval-after-load 'dired
+;;   '(progn (require 'helm-dired-history)
+;;           (define-key dired-mode-map "," 'helm-dired-history-view)))
 ;;
 ;;; Commands:
 ;;
