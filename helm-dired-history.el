@@ -80,7 +80,7 @@
 (add-hook 'dired-after-readin-hook 'helm-dired-history-update)
 
 ;;;###autoload
-(defvar helm-c-source-dired-history
+(defvar helm-source-dired-history
   '((name . "Dired History:")
     (candidates . helm-dired-history-variable)
     (action . (("Go" . (lambda(candidate) (dired candidate)))))))
@@ -92,7 +92,7 @@
   (let ((helm-execute-action-at-once-if-one t)
         (helm-quit-if-no-candidate
          (lambda () (message "No history record."))))
-    (helm '(helm-c-source-dired-history)
+    (helm '(helm-source-dired-history)
               ;; Initialize input with current symbol
               ""  nil nil)))
 
