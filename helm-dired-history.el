@@ -67,7 +67,6 @@
 
 (defvar helm-dired-history-variable nil)
 
-;;;###autoload
 (defun helm-dired-history-update()
   "update variable `helm-dired-history-variable'."
   (setq helm-dired-history-variable
@@ -76,10 +75,8 @@
         (append (list (dired-current-directory)) helm-dired-history-variable)))
 
 ;;when you open dired buffer ,update `helm-dired-history-variable'.
-;;;###autoload
 (add-hook 'dired-after-readin-hook 'helm-dired-history-update)
 
-;;;###autoload
 (defvar helm-source-dired-history
   '((name . "Dired History:")
     (candidates . helm-dired-history-variable)
