@@ -64,13 +64,23 @@
 
 (require 'helm)
 (require 'helm-types)
+(require 'helm-files)
 (require 'dired)
 
 (defvar helm-dired-history-variable nil)
 (defvar helm-dired-history-fuzzy-match t)
 
+(defvar helm-dired-history-cleanup-p nil)
+
 (defun helm-dired-history-update()
   "update variable `helm-dired-history-variable'."
+  (unless helm-dired-history-cleanup-p
+    (setq helm-dired-history-cleanup-p t)
+    (let ((tmp-history ))
+      (dolist (d helm-dired-history-variable)
+        (when (or (file-remote-p d) (file-directory-p d))
+          (add-to-list 'tmp-history d t)))
+      (setq helm-dired-history-variable tmp-history)))
   (setq helm-dired-history-variable
         (delete-dups (delete (dired-current-directory) helm-dired-history-variable)))
   (setq helm-dired-history-variable
