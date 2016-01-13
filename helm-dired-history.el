@@ -80,8 +80,11 @@
 (defvar helm-source-dired-history
   '((name . "Dired History:")
     (candidates . helm-dired-history-variable)
-    (action . (("Go" . (lambda(candidate) (dired candidate)))))))
-
+    (action . (("Go" .
+                (lambda(candidate)
+                  (if (file-directory-p candidate)
+                      (dired candidate)
+                    (message "dired do not exists %s",dired))))))))
 ;;;###autoload
 (defun helm-dired-history-view()
   "call `helm' to show dired history."
