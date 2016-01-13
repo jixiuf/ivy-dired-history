@@ -63,9 +63,11 @@
 ;;; Code:
 
 (require 'helm)
+(require 'helm-types)
 (require 'dired)
 
 (defvar helm-dired-history-variable nil)
+(defvar helm-dired-history-fuzzy-match t)
 
 (defun helm-dired-history-update()
   "update variable `helm-dired-history-variable'."
@@ -77,14 +79,15 @@
 ;;when you open dired buffer ,update `helm-dired-history-variable'.
 (add-hook 'dired-after-readin-hook 'helm-dired-history-update)
 
+(defclass helm-dired-history-source (helm-source-sync helm-type-file)
+  ((candidates :initform (lambda () helm-dired-history-variable))
+   (keymap :initform helm-generic-files-map)
+   (help-message :initform helm-generic-file-help-message)))
+
 (defvar helm-source-dired-history
-  '((name . "Dired History:")
-    (candidates . helm-dired-history-variable)
-    (action . (("Go" .
-                (lambda(candidate)
-                  (if (file-directory-p candidate)
-                      (dired candidate)
-                    (message "dired do not exists %s",dired))))))))
+  (helm-make-source "Dired History" 'helm-dired-history-source
+    :fuzzy-match helm-dired-history-fuzzy-match))
+
 ;;;###autoload
 (defun helm-dired-history-view()
   "call `helm' to show dired history."
@@ -93,8 +96,8 @@
         (helm-quit-if-no-candidate
          (lambda () (message "No history record."))))
     (helm '(helm-source-dired-history)
-              ;; Initialize input with current symbol
-              ""  nil nil)))
+          ;; Initialize input with current symbol
+          ""  nil nil)))
 
 (provide 'helm-dired-history)
 ;;ends here.
