@@ -85,9 +85,9 @@
         (delete-dups (delete (dired-current-directory) helm-dired-history-variable)))
   (let ((dir (dired-current-directory)))
     (when (file-remote-p dir)
-      (setq dir (propertize dir 'face 'font-lock-warning-face))
-      (setq helm-dired-history-variable
-            (append (list dir) helm-dired-history-variable)))))
+      (setq dir (propertize dir 'face 'font-lock-warning-face)))
+    (setq helm-dired-history-variable
+          (append (list dir) helm-dired-history-variable))))
 
 ;;when you open dired buffer ,update `helm-dired-history-variable'.
 (add-hook 'dired-after-readin-hook 'helm-dired-history-update)
