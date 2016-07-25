@@ -118,4 +118,4 @@
           ""  nil nil)))
 
 (provide 'helm-dired-history)
-;;ends here.
+;;; helm-dired-history.el ends here.
