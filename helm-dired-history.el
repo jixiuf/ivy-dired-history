@@ -6,6 +6,7 @@
 ;; Version: 0.1.1
 ;; X-URL:https://github.com/jixiuf/helm-dired-history
 ;; Keywords: helm, dired history
+;; Package-Requires: ((helm "1.9.8"))
 ;;
 ;; Features that might be required by this library:
 ;;
@@ -118,4 +119,4 @@
           ""  nil nil)))
 
 (provide 'helm-dired-history)
-;;ends here.
+;;; helm-dired-history.el ends here.
