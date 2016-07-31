@@ -69,8 +69,17 @@
 (require 'dired)
 (require 'cl-lib)
 
+(defgroup helm-dired-history nil
+  "dired history for Helm."
+  :group 'helm)
+
+
+(defcustom helm-dired-history-fuzzy-match t
+  "Enable fuzzy matching in `helm-dired-history-source' when non--nil."
+  :type 'boolean
+  :group 'helm-dired-history)
+
 (defvar helm-dired-history-variable nil)
-(defvar helm-dired-history-fuzzy-match t)
 
 (defvar helm-dired-history-cleanup-p nil)
 
