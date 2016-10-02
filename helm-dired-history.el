@@ -127,5 +127,31 @@
           ;; Initialize input with current symbol
           ""  nil nil)))
 
+;; integrating dired history feature into commands like
+;; dired-do-copy and dired-do-rename. What I think of is that when
+;; user press C (copy) or R (rename) mode, it is excellent to have
+;; an option allowing users to select a directory from the history
+;; list.
+
+;;see https://github.com/jixiuf/helm-dired-history/issues/6
+(defadvice dired-mark-read-file-name (around  helm-dired-history activate)
+  (setq ad-return-value
+        (dired-mark-pop-up
+         nil op-symbol files
+         ;; (function read-file-name)
+         (function helm-dired-history-read-file-name)
+         (format prompt (dired-mark-prompt arg files)) dir default)))
+
+(defun helm-dired-history-read-file-name
+    (prompt &optional dir default-filename mustmatch initial predicate)
+  (if dir
+      (helm-read-file-name prompt
+                           :name dir
+                           :default default-filename
+                           :history helm-dired-history-variable)
+    (helm-read-file-name prompt
+                         :default default-filename
+                         :history helm-dired-history-variable)))
+
 (provide 'helm-dired-history)
 ;;; helm-dired-history.el ends here.
