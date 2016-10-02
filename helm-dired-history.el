@@ -66,6 +66,7 @@
 (require 'helm)
 (require 'helm-types)
 (require 'helm-files)
+(require 'helm-mode)
 (require 'dired)
 (require 'cl-lib)
 
@@ -79,6 +80,10 @@
   :type 'boolean
   :group 'helm-dired-history)
 
+(defcustom helm-dired-history-max 200
+  "length of history for helm-dired-history"
+  :type 'number
+  :group 'helm-dired-history)
 (defvar helm-dired-history-variable nil)
 
 (defvar helm-dired-history-cleanup-p nil)
@@ -95,7 +100,8 @@
   (setq helm-dired-history-variable
         (delete-dups (delete (dired-current-directory) helm-dired-history-variable)))
   (setq helm-dired-history-variable
-        (append (list (dired-current-directory)) helm-dired-history-variable)))
+        (append (list (dired-current-directory)) helm-dired-history-variable))
+  (helm-dired-history-trim))
 
 ;;when you open dired buffer ,update `helm-dired-history-variable'.
 (add-hook 'dired-after-readin-hook 'helm-dired-history-update)
@@ -105,6 +111,12 @@
            if (file-remote-p (cdr c))
            collect (cons (propertize (car c) 'face 'font-lock-warning-face) (cdr c))
            else collect c))
+
+
+(defun helm-dired-history-trim ()
+  "Retain only the first `helm-dired-history-max' items in VALUE."
+  (if (> (length helm-dired-history-variable) helm-dired-history-max)
+      (setcdr (nthcdr (1- helm-dired-history-max) helm-dired-history-variable) nil)))
 
 (defclass helm-dired-history-source (helm-source-sync helm-type-file)
   ((candidates :initform (lambda () helm-dired-history-variable))
