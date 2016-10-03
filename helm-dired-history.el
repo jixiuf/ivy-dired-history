@@ -3,7 +3,7 @@
 ;; Author: Joseph(纪秀峰) <jixiuf@gmail.com>
 ;; Copyright (C) 2011,2012, Joseph(纪秀峰), all rights reserved.
 ;; Created: 2011-03-26
-;; Version: 0.1.1
+;; Version: 1.0
 ;; X-URL:https://github.com/jixiuf/helm-dired-history
 ;; Keywords: helm, dired history
 ;; Package-Requires: ((helm "1.9.8")(cl-lib "0.5"))
@@ -40,14 +40,35 @@
 ;; can remember dired directory you have visited and list them
 ;; using `helm.el'.
 
+;; integrating dired history feature into commands like
+;; dired-do-copy and dired-do-rename. What I think of is that when
+;; user press C (copy) or R (rename) mode, it is excellent to have
+;; an option allowing users to select a directory from the history
+;; list.
+
+;; after integrated the initial-input of `dired' `dired-other-window'
+;; and `dired-other-frame' are changed from default-directory to empty,
+;; and the first element of history is default-directory,so you can
+;; just press `RET' or `C-j' to select it.
+
+
+
 ;;; Installation:
 
 ;; (require 'savehist)
 ;; (add-to-list 'savehist-additional-variables 'helm-dired-history-variable)
 ;; (savehist-mode 1)
-;; (eval-after-load 'dired
-;;   '(progn (require 'helm-dired-history)
-;;           (define-key dired-mode-map "," 'helm-dired-history-view)))
+
+;; (with-eval-after-load 'dired
+;;   (require 'helm-dired-history)
+;; ;; if you are using ido,you'd better disable ido for dired
+;; ;; (define-key (cdr ido-minor-mode-map-entry) [remap dired] nil) ;in ido-setup-hook
+;;   (define-key dired-mode-map "," 'dired))
+;; or
+;; (with-eval-after-load 'dired
+;;   (require 'helm-dired-history)
+;;   (define-key dired-mode-map "," 'helm-dired-history-view))
+
 ;;
 ;;; Commands:
 ;;
@@ -63,11 +84,12 @@
 
 ;;; Code:
 
+(require 'dired)
+(require 'dired-aux)
 (require 'helm)
 (require 'helm-types)
 (require 'helm-files)
 (require 'helm-mode)
-(require 'dired)
 (require 'cl-lib)
 
 (defgroup helm-dired-history nil
@@ -88,7 +110,8 @@
 
 (defvar helm-dired-history-cleanup-p nil)
 
-(defun helm-dired-history-update()
+
+(defun helm-dired-history--update(dir)
   "update variable `helm-dired-history-variable'."
   (unless helm-dired-history-cleanup-p
     (setq helm-dired-history-cleanup-p t)
@@ -98,10 +121,14 @@
           (add-to-list 'tmp-history d t)))
       (setq helm-dired-history-variable tmp-history)))
   (setq helm-dired-history-variable
-        (delete-dups (delete (dired-current-directory) helm-dired-history-variable)))
+        (delete-dups (delete dir helm-dired-history-variable)))
   (setq helm-dired-history-variable
-        (append (list (dired-current-directory)) helm-dired-history-variable))
+        (append (list dir) helm-dired-history-variable))
   (helm-dired-history-trim))
+
+(defun helm-dired-history-update()
+  "update variable `helm-dired-history-variable'."
+  (helm-dired-history--update (dired-current-directory)))
 
 ;;when you open dired buffer ,update `helm-dired-history-variable'.
 (add-hook 'dired-after-readin-hook 'helm-dired-history-update)
@@ -140,19 +167,25 @@
           ""  nil nil)))
 
 ;; integrating dired history feature into commands like
-;; dired-do-copy and dired-do-rename. What I think of is that when
-;; user press C (copy) or R (rename) mode, it is excellent to have
-;; an option allowing users to select a directory from the history
-;; list.
-
+;; dired-do-copy and dired-do-rename.
 ;;see https://github.com/jixiuf/helm-dired-history/issues/6
-(defadvice dired-mark-read-file-name (around  helm-dired-history activate)
-  (setq ad-return-value
-        (dired-mark-pop-up
-         nil op-symbol files
-         ;; (function read-file-name)
-         (function helm-dired-history-read-file-name)
-         (format prompt (dired-mark-prompt arg files)) dir default)))
+(defadvice dired-mark-read-file-name(around helm-dired-history activate)
+  (cl-letf (((symbol-function 'read-file-name)
+             #'helm-dired-history-read-file-name))
+    ad-do-it))
+
+(defadvice dired-read-dir-and-switches(around helm-dired-history activate)
+  (helm-dired-history--update (expand-file-name default-directory))
+  (let ((default-directory default-directory))
+    (unless (next-read-file-uses-dialog-p) (setq default-directory ""))
+    (cl-letf (((symbol-function 'read-file-name)
+               #'helm-dired-history-read-file-name))
+      ad-do-it)))
+
+(defadvice dired-do-compress-to(around helm-dired-history activate)
+  (cl-letf (((symbol-function 'read-file-name)
+             #'helm-dired-history-read-file-name))
+    ad-do-it))
 
 (defun helm-dired-history-read-file-name
     (prompt &optional dir default-filename mustmatch initial predicate)
