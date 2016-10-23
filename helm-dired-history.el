@@ -192,11 +192,11 @@
   (if dir
       (helm-read-file-name prompt
                            :name dir
-                           :default default-filename
+                           :initial-input dir
                            :history helm-dired-history-variable)
     (helm-read-file-name prompt
-                         :default default-filename
                          :history helm-dired-history-variable)))
+
 
 (provide 'helm-dired-history)
 ;;; helm-dired-history.el ends here.
