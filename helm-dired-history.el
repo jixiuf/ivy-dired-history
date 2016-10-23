@@ -3,7 +3,7 @@
 ;; Author: Joseph(纪秀峰) <jixiuf@gmail.com>
 ;; Copyright (C) 2011,2012, Joseph(纪秀峰), all rights reserved.
 ;; Created: 2011-03-26
-;; Version: 1.0
+;; Version: 1.1
 ;; X-URL:https://github.com/jixiuf/helm-dired-history
 ;; Keywords: helm, dired history
 ;; Package-Requires: ((helm "1.9.8")(cl-lib "0.5"))
