@@ -1,5 +1,8 @@
 * Helm Dired History
 [[http://melpa.org/#/helm-dired-history][http://melpa.org/packages/helm-dired-history-badge.svg]]
+------------
+
+
 
 someone like to reuse the current dired buffer to visit another
 directory, so that you just need open one dired buffer. but the bad
@@ -17,27 +20,22 @@ after integrated the initial-input of `dired' `dired-other-window' and
 the first element of history is default-directory,so you can just
 press `RET' or `C-j' to select it.
 
-
-
-
 * Installation:
+The easiest way to get started is to install the package via [[http://melpa.org/][MELPA]]
+
 #+BEGIN_SRC emacs-lisp
   (package-install 'helm-dired-history)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-  (require 'savehist)
-  (add-to-list 'savehist-additional-variables 'helm-dired-history-variable)
-  (savehist-mode 1)
+(require 'savehist)
+(add-to-list 'savehist-additional-variables 'helm-dired-history-variable)
+(savehist-mode 1)
 
-  (with-eval-after-load 'dired
-    (require 'helm-dired-history)
+(with-eval-after-load 'dired
+  (require 'helm-dired-history) 
   ;; if you are using ido,you'd better disable ido for dired
   ;; (define-key (cdr ido-minor-mode-map-entry) [remap dired] nil) ;in ido-setup-hook
-    (define-key dired-mode-map "," 'dired))
-  or
-  (with-eval-after-load 'dired
-    (require 'helm-dired-history)
-    (define-key dired-mode-map "," 'helm-dired-history-view))
+  (define-key dired-mode-map "," 'dired))
 #+END_SRC
 
