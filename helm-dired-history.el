@@ -142,13 +142,14 @@
 
 (defun helm-dired-history-read-file-name
     (prompt &optional dir default-filename mustmatch initial predicate)
-  (if dir
+  (let ((helm-mode-reverse-history nil))
+    (if dir
+        (helm-read-file-name prompt
+                             :name dir
+                             :initial-input dir
+                             :history helm-dired-history-variable)
       (helm-read-file-name prompt
-                           :name dir
-                           :initial-input dir
-                           :history helm-dired-history-variable)
-    (helm-read-file-name prompt
-                         :history helm-dired-history-variable)))
+                           :history helm-dired-history-variable))))
 
 
 (provide 'helm-dired-history)
