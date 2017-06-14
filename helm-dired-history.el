@@ -130,7 +130,7 @@
 (defadvice dired-read-dir-and-switches(around helm-dired-history activate)
   (helm-dired-history--update (expand-file-name default-directory))
   (let ((default-directory default-directory))
-    (unless (next-read-file-uses-dialog-p) (setq default-directory ""))
+    ;; (unless (next-read-file-uses-dialog-p) (setq default-directory ""))
     (cl-letf (((symbol-function 'read-file-name)
                #'helm-dired-history-read-file-name))
       ad-do-it)))
@@ -142,14 +142,28 @@
 
 (defun helm-dired-history-read-file-name
     (prompt &optional dir default-filename mustmatch initial predicate)
-  (let ((helm-mode-reverse-history nil))
-    (if dir
-        (helm-read-file-name prompt
-                             :name dir
-                             :initial-input dir
-                             :history helm-dired-history-variable)
-      (helm-read-file-name prompt
-                           :history helm-dired-history-variable))))
+  (if dir
+      (let ((default-directory dir))
+        (ivy-read prompt
+                  (append helm-dired-history-variable (directory-files default-directory) )
+                  ;; 'read-file-name-internal
+                  ;; :matcher #'counsel--find-file-matcher
+                  :initial-input initial
+                  :keymap counsel-find-file-map
+                  ;; :history 'helm-dired-history-variable
+                  ))
+    (ivy-read prompt
+              (append helm-dired-history-variable (directory-files default-directory) )
+                  ;; 'read-file-name-internal
+                  ;; (all-completions  "" 'read-file-name-internal)
+              ;; :matcher #'counsel--find-file-matcher
+              :initial-input initial
+              :keymap counsel-find-file-map
+              ;; :history 'helm-dired-history-variable
+              :caller 'helm-dired
+              )))
+(ivy-set-display-transformer
+ 'helm-dired 'ivy-read-file-transformer)
 
 
 (provide 'helm-dired-history)
