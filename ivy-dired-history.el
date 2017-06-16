@@ -133,7 +133,7 @@ Argument DIR directory."
 
 (defadvice dired-read-dir-and-switches(around ivy-dired-history activate)
   "Wrapper ‘read-file-name’ with idv-dired-history-read-file-name."
-  (ivy-dired-history--update (expand-file-name default-directory))
+  ;; (ivy-dired-history--update (expand-file-name default-directory))
   (let ((default-directory default-directory))
     ;; (unless (next-read-file-uses-dialog-p) (setq default-directory "/"))
     (cl-letf (((symbol-function 'read-file-name)
