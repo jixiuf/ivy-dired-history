@@ -157,7 +157,7 @@ Optional argument MUSTMATCH mustmatch.
 Optional argument INITIAL init value.
 Optional argument PREDICATE predicate."
     (cl-letf (((symbol-function 'read-file-name-internal)
-               #'ivy-read-file-name-internal))
+               #'ivy-dired-history-read-file-name-internal))
       (let ((ivy-sort-functions-alist nil)
             (default-directory default-directory)
             (ivy-extra-directories nil))
@@ -176,7 +176,7 @@ Optional argument PREDICATE predicate."
                             #'completion--file-name-table)
   "same as read-file-name-internal")
 
-(defun ivy-read-file-name-internal (string pred action)
+(defun ivy-dired-history-read-file-name-internal (string pred action)
   "Merge ivy-directory-history-variables with files in current directory.
 Argument STRING string.
 Argument PRED pred.
