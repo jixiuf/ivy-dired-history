@@ -74,9 +74,14 @@
   :type 'number
   :group 'ivy-dired-history)
 
-(defcustom ivy-dired-ignore-directory '("/")
+(defcustom ivy-dired-history-ignore-directory '("/")
   "Length of history for ivy-dired-history."
   :type '(repeat string)
+  :group 'ivy-dired-history)
+
+(defcustom ivy-dired-history-disable-flx-sort t
+  "Disable the automatic sort by flx when using `ivy--regex-fuzzy'."
+  :type 'boolean
   :group 'ivy-dired-history)
 
 (defvar ivy-dired-history-variable nil)
@@ -95,7 +100,7 @@
   "Update variable `ivy-dired-history-variable'.
 Argument DIR directory."
        (setq dir (abbreviate-file-name (expand-file-name dir)))
-       (unless (member dir ivy-dired-ignore-directory)
+       (unless (member dir ivy-dired-history-ignore-directory)
          (unless ivy-dired-history-cleanup-p
            (setq ivy-dired-history-cleanup-p t)
            (let ((tmp-history ))
@@ -160,16 +165,18 @@ Optional argument PREDICATE predicate."
                #'ivy-dired-history-read-file-name-internal))
       (let ((ivy-sort-functions-alist nil)
             (default-directory default-directory)
+            (ivy--flx-featurep ivy--flx-featurep)
             (ivy-extra-directories nil))
         (when dir (setq default-directory dir))
+        (when ivy-dired-history-disable-flx-sort
+          (setq ivy--flx-featurep nil))
         (ivy-read prompt
                   'read-file-name-internal
                   :initial-input initial
-                  ;; :sort t
+                  ;; :sort nil
                   ;; :matcher #'counsel--find-file-matcher
                   :keymap ivy-dired-history-map
-                  :caller 'read-file-name-internal)
-        )))
+                  :caller 'read-file-name-internal))))
 
 (defalias 'ivy-dired-history--read-file-name-internal
   (completion-table-in-turn #'completion--embedded-envvar-table
