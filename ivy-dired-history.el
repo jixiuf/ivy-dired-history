@@ -79,7 +79,9 @@
 
 (defvar ivy-dired-history-variable nil)
 
-(defvar ivy-dired-history-cleanup-p nil)
+(defvar ivy-dired-history--cleanup-p nil)
+(defvar ivy-dired-history--extra-directories nil)
+(defvar ivy-dired-history--default-directory nil)
 
 (defvar ivy-dired-history-map
   (let ((map (make-sparse-keymap)))
@@ -95,8 +97,8 @@
 Argument DIR directory."
        (setq dir (abbreviate-file-name (expand-file-name dir)))
        (unless (member dir ivy-dired-history-ignore-directory)
-         (unless ivy-dired-history-cleanup-p
-           (setq ivy-dired-history-cleanup-p t)
+         (unless ivy-dired-history--cleanup-p
+           (setq ivy-dired-history--cleanup-p t)
            (let ((tmp-history ))
              (dolist (d ivy-dired-history-variable)
                (when (or (file-remote-p d) (file-directory-p d))
@@ -106,7 +108,7 @@ Argument DIR directory."
                (delete-dups (delete dir ivy-dired-history-variable)))
          (setq ivy-dired-history-variable
                (append (list dir) ivy-dired-history-variable))
-         (ivy-dired-history-trim)))
+         (ivy-dired-history--trim)))
 
 (defun ivy-dired-history-update()
   "Update variable `ivy-dired-history-variable'."
@@ -115,7 +117,7 @@ Argument DIR directory."
 ;;when you open dired buffer ,update `ivy-dired-history-variable'.
 (add-hook 'dired-after-readin-hook 'ivy-dired-history-update)
 
-(defun ivy-dired-history-trim()
+(defun ivy-dired-history--trim()
   "Retain only the first `ivy-dired-history-max' items in VALUE."
   (if (> (length ivy-dired-history-variable) ivy-dired-history-max)
       (setcdr (nthcdr (1- ivy-dired-history-max) ivy-dired-history-variable) nil)))
@@ -127,7 +129,7 @@ Argument DIR directory."
 (defadvice dired-mark-read-file-name(around ivy-dired-history activate)
   "Wrapper ‘read-file-name’ with idv-dired-history-read-file-name."
   (cl-letf (((symbol-function 'read-file-name)
-             #'ivy-dired-history-read-file-name))
+             #'ivy-dired-history--read-file-name))
     ad-do-it))
 
 (defadvice dired-read-dir-and-switches(around ivy-dired-history activate)
@@ -136,17 +138,17 @@ Argument DIR directory."
   (let ((default-directory default-directory))
     ;; (unless (next-read-file-uses-dialog-p) (setq default-directory "/"))
     (cl-letf (((symbol-function 'read-file-name)
-               #'ivy-dired-history-read-file-name))
+               #'ivy-dired-history--read-file-name))
       ad-do-it)))
 
 (defadvice dired-do-compress-to(around ivy-dired-history activate)
   "Wrapper ‘read-file-name’ with idv-dired-history-read-file-name."
   (cl-letf (((symbol-function 'read-file-name)
-             #'ivy-dired-history-read-file-name))
+             #'ivy-dired-history--read-file-name))
     ad-do-it))
 
 
-(defun ivy-dired-history-sort (name candidates)
+(defun ivy-dired-history--sort (name candidates)
   "Re-sort candidates by NAME.
 CANDIDATES is a list of directories(with path) each match NAME.
 equal>prefix>substring>other."
@@ -203,7 +205,7 @@ When ARG is t, exit with current text, ignoring the candidates."
              return (setq idx i))
     (when idx (ivy-set-index idx))))
 
-(defun ivy-dired-history-read-file-name
+(defun ivy-dired-history--read-file-name
     (prompt &optional dir default-filename mustmatch initial predicate)
   "Read file name with hisotry as collection.
 Argument PROMPT prompt.
@@ -212,15 +214,16 @@ Optional argument DEFAULT-FILENAME default.
 Optional argument MUSTMATCH mustmatch.
 Optional argument INITIAL init value.
 Optional argument PREDICATE predicate."
+  (setq ivy-dired-history--extra-directories ivy-extra-directories)
   (cl-letf (((symbol-function 'read-file-name-internal)
-             #'ivy-dired-history-read-file-name-internal))
+             #'ivy-dired-history--read-file-name-internal))
     (let ((ivy-sort-functions-alist nil)
           (default-directory default-directory)
           (ivy--flx-featurep nil)
-          (ivy-sort-matches-functions-alist '((t . ivy-dired-history-sort)))
+          (ivy-sort-matches-functions-alist '((t . ivy-dired-history--sort)))
           (ivy-extra-directories nil))
       (when dir (setq default-directory dir))
-      (setq ivy-dired-history-default-directory default-directory)
+      (setq ivy-dired-history--default-directory default-directory)
       (ivy-read prompt
                 'read-file-name-internal
                 :initial-input initial
@@ -229,22 +232,25 @@ Optional argument PREDICATE predicate."
                 :keymap ivy-dired-history-map
                 :caller 'read-file-name-internal))))
 
-(defvar ivy-dired-history-default-directory nil)
-(defalias 'ivy-dired-history--read-file-name-internal
+
+(defalias 'ivy-dired-history--old-read-file-name-internal
   (completion-table-in-turn #'completion--embedded-envvar-table
                             #'completion--file-name-table)
   "same as read-file-name-internal")
 
-(defun ivy-dired-history-read-file-name-internal (string pred action)
+(defun ivy-dired-history--read-file-name-internal (string pred action)
   "Merge ivy-directory-history-variables with files in current directory.
 Argument STRING string.
 Argument PRED pred.
 Argument ACTION action."
   (let ((cands ivy-dired-history-variable))
-    (unless (string= default-directory ivy-dired-history-default-directory)
-      (setq cands (ivy--filter default-directory cands)))
+    (unless (or (string= default-directory ivy-dired-history--default-directory)
+                (eq this-command 'ivy-dired-history-alt-done))
+      (setq cands (ivy--filter default-directory cands))
+      (setq ivy-extra-directories ivy-dired-history--extra-directories)
+      )
     (append cands
-            (ivy-dired-history--read-file-name-internal string pred action))))
+            (ivy-dired-history--old-read-file-name-internal string pred action))))
 
 
 (provide 'ivy-dired-history)
