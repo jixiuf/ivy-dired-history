@@ -1,4 +1,4 @@
-;;; ivy-dired-history.el --- quickly visit dired directory you have visted
+;;; ivy-dired-history.el --- use ivy to open recent directories
 
 ;; Author: 纪秀峰 <jixiuf@gmail.com>
 ;; Copyright (C) 2017 纪秀峰, all rights reserved.
@@ -32,14 +32,11 @@
 
 ;;; Commentary:
 ;;
-;; remember dired directory you have visited and list them
-;; using `ivy.el'.
+;; use `ivy' to open recent directories.
 
-;; integrating dired history feature into commands like
-;; dired-do-copy and dired-do-rename. What I think of is that when
-;; user press C (copy) or R (rename) mode, it is excellent to have
-;; an option allowing users to select a directory from the history
-;; list.
+;; it is integrated with `dired-do-copy' and `dired-do-rename'.
+;; when you press C (copy) or R (rename) , it is excellent to
+;; allow users to select a directory from the recent dired history .
 
 
 
