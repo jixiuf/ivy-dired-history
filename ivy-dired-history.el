@@ -132,7 +132,7 @@ Argument DIR directory."
 
 (defadvice dired-read-dir-and-switches(around ivy-dired-history activate)
   "Wrapper ‘read-file-name’ with idv-dired-history-read-file-name."
-  ;; (ivy-dired-history--update (expand-file-name default-directory))
+  (ivy-dired-history--update (expand-file-name default-directory))
   (let ((default-directory default-directory))
     ;; (unless (next-read-file-uses-dialog-p) (setq default-directory "/"))
     (cl-letf (((symbol-function 'read-file-name)
@@ -196,12 +196,12 @@ equal>prefix>substring>other."
 When ARG is t, exit with current text, ignoring the candidates."
   (interactive "P")
   (call-interactively 'ivy-alt-done)
-  (let ((idx ))
+  (let ((idx))
     (cl-loop for cand in ivy--all-candidates
              for i from 0
              if (string= (expand-file-name ivy--directory)(expand-file-name cand))
              return (setq idx i))
-    (ivy-set-index idx)))
+    (when idx (ivy-set-index idx))))
 
 (defun ivy-dired-history-read-file-name
     (prompt &optional dir default-filename mustmatch initial predicate)
@@ -212,22 +212,24 @@ Optional argument DEFAULT-FILENAME default.
 Optional argument MUSTMATCH mustmatch.
 Optional argument INITIAL init value.
 Optional argument PREDICATE predicate."
-    (cl-letf (((symbol-function 'read-file-name-internal)
-               #'ivy-dired-history-read-file-name-internal))
-      (let ((ivy-sort-functions-alist nil)
-            (default-directory default-directory)
-            (ivy--flx-featurep nil)
-            (ivy-sort-matches-functions-alist '((t . ivy-dired-history-sort)))
-            (ivy-extra-directories nil))
-        (when dir (setq default-directory dir))
-        (ivy-read prompt
-                  'read-file-name-internal
-                  :initial-input initial
-                  :sort t
-                  :matcher #'counsel--find-file-matcher
-                  :keymap ivy-dired-history-map
-                  :caller 'read-file-name-internal))))
+  (cl-letf (((symbol-function 'read-file-name-internal)
+             #'ivy-dired-history-read-file-name-internal))
+    (let ((ivy-sort-functions-alist nil)
+          (default-directory default-directory)
+          (ivy--flx-featurep nil)
+          (ivy-sort-matches-functions-alist '((t . ivy-dired-history-sort)))
+          (ivy-extra-directories nil))
+      (when dir (setq default-directory dir))
+      (setq ivy-dired-history-default-directory default-directory)
+      (ivy-read prompt
+                'read-file-name-internal
+                :initial-input initial
+                :sort t
+                :matcher #'counsel--find-file-matcher
+                :keymap ivy-dired-history-map
+                :caller 'read-file-name-internal))))
 
+(defvar ivy-dired-history-default-directory nil)
 (defalias 'ivy-dired-history--read-file-name-internal
   (completion-table-in-turn #'completion--embedded-envvar-table
                             #'completion--file-name-table)
@@ -238,8 +240,11 @@ Optional argument PREDICATE predicate."
 Argument STRING string.
 Argument PRED pred.
 Argument ACTION action."
-       (append ivy-dired-history-variable
-               (ivy-dired-history--read-file-name-internal string pred action)))
+  (let ((cands ivy-dired-history-variable))
+    (unless (string= default-directory ivy-dired-history-default-directory)
+      (setq cands (ivy--filter default-directory cands)))
+    (append cands
+            (ivy-dired-history--read-file-name-internal string pred action))))
 
 
 (provide 'ivy-dired-history)
