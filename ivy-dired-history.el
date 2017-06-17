@@ -85,6 +85,7 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "<return>") 'ivy-done)
     (define-key map (kbd "<RET>")    'ivy-done)
+    (define-key map [remap ivy-alt-done] 'ivy-dired-history-alt-done)
     map))
 
 (set-keymap-parent ivy-dired-history-map counsel-find-file-map)
@@ -179,6 +180,18 @@ equal>prefix>substring>other."
             (nreverse res-prefix)
             (nreverse res-substring)
             (nreverse res-noprefix)))))
+
+(defun ivy-dired-history-alt-done(&optional arg)
+  "Exit the minibuffer with the selected candidate.
+When ARG is t, exit with current text, ignoring the candidates."
+  (interactive "P")
+  (call-interactively 'ivy-alt-done)
+  (let ((idx ))
+    (cl-loop for cand in ivy--all-candidates
+             for i from 0
+             if (string= (expand-file-name ivy--directory)(expand-file-name cand))
+             return (setq idx i))
+    (ivy-set-index idx)))
 
 (defun ivy-dired-history-read-file-name
     (prompt &optional dir default-filename mustmatch initial predicate)
