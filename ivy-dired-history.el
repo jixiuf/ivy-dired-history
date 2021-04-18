@@ -80,6 +80,11 @@
   :type '(repeat string)
   :group 'ivy-dired-history)
 
+(defvar ivy-dired-history-undate-delay 15 
+  "An update delay in second, to avoid adding intermediate dirs during a successive dir jumping,
+set it to a proper number greater than 0.")
+
+(defvar ivy-dired-history-update-timer nil)
 
 (defvar ivy-dired-history-variable nil)
 
@@ -116,7 +121,13 @@ Argument DIR directory."
 
 (defun ivy-dired-history-update()
   "Update variable `ivy-dired-history-variable'."
-  (ivy-dired-history--update (dired-current-directory)))
+  (and (timerp ivy-dired-history-update-timer)
+       (cancel-timer ivy-dired-history-update-timer))
+  (setq ivy-dired-history-update-timer
+        (let ((dir (dired-current-directory)))
+          (run-with-timer ivy-dired-history-undate-delay nil
+                          `(lambda ()
+                             (ivy-dired-history--update ,dir))))))
 
 ;;when you open dired buffer ,update `ivy-dired-history-variable'.
 (add-hook 'dired-after-readin-hook 'ivy-dired-history-update)
