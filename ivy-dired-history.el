@@ -167,7 +167,9 @@ Argument DIR directory."
   "Re-sort candidates by NAME.
 CANDIDATES is a list of directories(with path) each match NAME.
 equal>prefix>substring>other."
-  (if (or (string-match "^\\^" name) (string= name ""))
+  (if (or (string-match "^\\^" name)
+          (string-match "^/" name)
+          (string= name ""))
       candidates
     (let* ((base-re (funcall ivy--regex-function name))
            (base-re (if (consp base-re) (caar base-re) base-re))
