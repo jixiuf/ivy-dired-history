@@ -1,3 +1,7 @@
+* Notices
+I don't use Helm/Ivy any more, and code in this repos has not changed for sevreal
+I use https://github.com/karthink/consult-dir now
+
 * Use ivy to open recent directories
 
 [[http://melpa.org/#/ivy-dired-history][http://melpa.org/packages/ivy-dired-history-badge.svg]]
